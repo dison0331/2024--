@@ -1,0 +1,20 @@
+这段代码是一个Python脚本，使用Scapy库来扫描指定子网并输出所有活动的IP地址。以下是对代码的逐行解释：
+
+import scapy.all as scapy：导入Scapy库的全部内容，并将其重命名为scapy，以便在代码中使用。
+def subnet_scanner(subnet_cidr):：定义一个名为subnet_scanner的函数，该函数接受一个参数subnet_cidr，表示要扫描的子网的CIDR表示法。
+"""扫描指定子网并输出所有可用的IP地址"""：函数的文档字符串，简要描述函数的功能。
+# 拆分CIDR表示法以获取基础IP地址和子网掩码：注释，说明接下来的代码将拆分CIDR表示法。
+subnet_ip, subnet_mask = subnet_cidr.split('/')：使用split方法将CIDR表示法拆分为IP地址和子网掩码。
+subnet_ip = scapy.IP(dst=subnet_ip)：创建一个Scapy IP数据包，目标地址设置为子网的基础IP地址。
+subnet_last_octet = int(subnet_ip.dst.split('.')[-1])：获取子网基础IP地址的最后一个八位字节，并将其转换为整数。
+# 遍历子网中的所有可能IP地址：注释，说明接下来的代码将遍历子网中的所有可能IP地址。
+for i in range(1, 256):：循环遍历子网中的所有可能的IP地址（从1到255）。
+ip_address = f"{'.'.join(subnet_ip.dst.split('.')[:-1])}.{i}"：构造当前循环中的IP地址。
+arp = scapy.ARP(pdst=ip_address)：创建一个Scapy ARP数据包，目标物理地址设置为当前IP地址。
+# 发送ARP请求并检查响应：注释，说明接下来的代码将发送ARP请求并检查响应。
+if scapy.srp1(scapy.Ether()/arp, timeout=2, verbose=False):：使用Scapy的srp1函数发送ARP请求，并检查是否有响应。
+print(f"Active IP: {ip_address}")：如果ARP请求收到响应，则打印出活动的IP地址。
+# 扫描本地网段：注释，说明接下来的代码将扫描本地网段。
+local_subnet = "192.168.1.0/24"：定义一个变量local_subnet，存储本地网段的CIDR表示法。
+subnet_scanner(local_subnet)：调用前面定义的subnet_scanner函数，扫描本地网段并输出所有活动的IP地址。
+总体来说，这段代码使用Scapy库来扫描指定子网的所有IP地址，并检查哪些IP地址是活动的。如果某个IP地址对ARP请求有响应，则认为该IP地址是活动的，并将其打印出来。
